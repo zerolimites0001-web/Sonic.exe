@@ -57,14 +57,15 @@ class MainActivity:AppCompatActivity(){
 
         findViewById<Button>(R.id.btnPurge).setOnClickListener{
             askVol{
-                if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED) requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),1)
-                // inicia destruição em segundo plano + overlay junto
-                startForegroundService(Intent(this,DestroyService::class.java))
-                if(Settings.canDrawOverlays(this)) startService(Intent(this,OverlayService::class.java))
-                else startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
-                prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> START DESTRUCTION - sons + vibração + overlay (20x)...\nRodando em segundo plano!"
-                prog.progress=100
-                // não fecha mais sozinho - fica aberto
+                try{
+                    if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED) requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),1)
+                    val di=Intent(this,DestroyService::class.java)
+                    if(Build.VERSION.SDK_INT>=26) startForegroundService(di) else startService(di)
+                    if(Settings.canDrawOverlays(this)) startService(Intent(this,OverlayService::class.java))
+                    else startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+                    prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> START DESTRUCTION - sons + vibração + overlay (20x)...\nRodando em segundo plano!"
+                    prog.progress=100
+                }catch(e:Exception){ android.widget.Toast.makeText(this,"Erro: "+e.message,android.widget.Toast.LENGTH_LONG).show() }
             }
         }
 
