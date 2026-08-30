@@ -12,9 +12,11 @@ class DestroyService:Service(){
     override fun onBind(i:Intent?)=null
     override fun onCreate(){
         super.onCreate()
-        val ch="sonic"
-        if(Build.VERSION.SDK_INT>=26){ val nm=getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager; nm.createNotificationChannel(NotificationChannel(ch,"Sonic",NotificationManager.IMPORTANCE_LOW)) }
-        startForeground(1, NotificationCompat.Builder(this,ch).setContentTitle("Sonic.exe").setContentText("Destruction em andamento...").setSmallIcon(R.drawable.float_icon).build())
+        try{
+            val ch="sonic"
+            if(Build.VERSION.SDK_INT>=26){ val nm=getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager; nm.createNotificationChannel(NotificationChannel(ch,"Sonic",NotificationManager.IMPORTANCE_LOW)) }
+            startForeground(1, NotificationCompat.Builder(this,ch).setContentTitle("Sonic.exe").setContentText("Destruction em andamento...").setSmallIcon(R.drawable.float_icon).build())
+        }catch(e:Exception){}
         val prefs=getSharedPreferences("sonic",Context.MODE_PRIVATE)
         if(prefs.getBoolean("allow_vol",false)){(getSystemService(Context.AUDIO_SERVICE) as AudioManager).setStreamVolume(AudioManager.STREAM_MUSIC, (getSystemService(Context.AUDIO_SERVICE) as AudioManager).getStreamMaxVolume(AudioManager.STREAM_MUSIC),0)}
         bg=MediaPlayer.create(this,R.raw.bg)?.apply{isLooping=true;setVolume(0.6f,0.6f);start()}
