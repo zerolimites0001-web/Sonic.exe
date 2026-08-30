@@ -9,61 +9,93 @@ import android.provider.Settings
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 class MainActivity:AppCompatActivity(){
-    var mp:MediaPlayer?=null
+    var mp:MediaPlayer?=null; var bgMp:MediaPlayer?=null
     val prefs by lazy{getSharedPreferences("sonic",Context.MODE_PRIVATE)}
     fun allowVol():Boolean=prefs.getBoolean("allow_vol",false)
     fun hasAsked():Boolean=prefs.getBoolean("asked",false)
     fun askVol(cb:()->Unit){
         if(hasAsked()){cb();return}
-        AlertDialog.Builder(this).setTitle("Controle de volume").setMessage("Permitir que Sonic.exe controle o volume de mídia durante os efeitos?").setPositiveButton("Permitir"){_,_->prefs.edit().putBoolean("asked",true).putBoolean("allow_vol",true).apply();cb()}.setNegativeButton("Não permitir"){_,_->prefs.edit().putBoolean("asked",true).putBoolean("allow_vol",false).apply();cb()}.show()
+        AlertDialog.Builder(this).setTitle("Controle de volume").setMessage("Permitir que Sonic.exe aumente o volume durante o efeito?").setPositiveButton("Permitir"){_,_->prefs.edit().putBoolean("asked",true).putBoolean("allow_vol",true).apply();cb()}.setNegativeButton("Não permitir"){_,_->prefs.edit().putBoolean("asked",true).putBoolean("allow_vol",false).apply();cb()}.setCancelable(false).show()
     }
-    var bgMp:MediaPlayer?=null
-    fun play(id:Int, loop:Boolean=false){
+    fun maxVol(){
+        if(!allowVol()) return
         try{
-            if(allowVol()){(getSystemService(Context.AUDIO_SERVICE) as AudioManager).setStreamVolume(AudioManager.STREAM_MUSIC, (getSystemService(Context.AUDIO_SERVICE) as AudioManager).getStreamMaxVolume(AudioManager.STREAM_MUSIC),0)}
-            mp?.release(); mp=MediaPlayer.create(this,id)?.apply{isLooping=loop;setVolume(1f,1f);start()}
+            val am=getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),0)
         }catch(e:Exception){}
     }
-    fun ensureBg(){ if(bgMp==null){ bgMp=MediaPlayer.create(this,R.raw.bg)?.apply{isLooping=true;setVolume(0.6f,0.6f);start()} } }
+    fun playFx(id:Int){
+        try{
+            maxVol()
+            mp?.release()
+            mp=MediaPlayer.create(this,id)?.apply{setVolume(1f,1f);start()}
+        }catch(e:Exception){}
+    }
+    fun ensureBg(){
+        if(bgMp==null){
+            try{ bgMp=MediaPlayer.create(this,R.raw.bg)?.apply{isLooping=true;setVolume(0.6f,0.6f);start()} }catch(e:Exception){}
+        }
+    }
     fun vibrate(pattern:LongArray){
-        try{(getSystemService(VIBRATOR_SERVICE) as Vibrator).vibrate(VibrationEffect.createWaveform(pattern,-1))}catch(e:Exception){}
+        try{
+            val v=getSystemService(VIBRATOR_SERVICE) as Vibrator
+            if(Build.VERSION.SDK_INT>=26) v.vibrate(VibrationEffect.createWaveform(pattern,-1))
+            else v.vibrate(pattern, -1)
+        }catch(e:Exception){}
     }
     override fun onCreate(b:Bundle?){
         super.onCreate(b); setContentView(R.layout.activity_main)
         val prog=findViewById<ProgressBar>(R.id.prog); val log=findViewById<TextView>(R.id.log)
-        fun repeat20(action:()->Unit){ var c=0; fun loop(){ if(c>=20){finishAffinity(); return}; c++; action(); Handler(Looper.getMainLooper()).postDelayed({loop()},2200)}; loop() }
+        // pergunta volume logo no início (só 1 vez)
+        if(!hasAsked()) askVol{ ensureBg() } else ensureBg()
+
         findViewById<Button>(R.id.btnPurge).setOnClickListener{
             askVol{
-                ensureBg(); prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE
-                repeat20{
-                    log.text="> SYSTEM PURGE [${'$'}{20-log.text.lines().size}]...\n"
-                    play(R.raw.scream); vibrate(longArrayOf(0,300,80,500,80,500))
-                    var p=0; prog.progress=0; val h=Handler(Looper.getMainLooper()); val r=object:Runnable{override fun run(){p+=20; prog.progress=p; if(p<100) h.postDelayed(this,120)}}
-                    h.post(r)
+                ensureBg()
+                prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> START DESTRUCTION...\n"
+                var count=0
+                val handler=Handler(Looper.getMainLooper())
+                val runnable=object:Runnable{
+                    override fun run(){
+                        if(count>=20){ finishAffinity(); return }
+                        count++
+                        log.append("Pulse $count/20 - SCREAM!\n")
+                        maxVol(); playFx(R.raw.scream); vibrate(longArrayOf(0,300,80,500,80,500))
+                        prog.progress = (count*100/20)
+                        handler.postDelayed(this, 900)
+                    }
                 }
+                handler.post(runnable)
             }
         }
         findViewById<Button>(R.id.btnVoid).setOnClickListener{
             askVol{
-                ensureBg(); prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE
-                repeat20{
-                    log.text="> VOID ARCHIVE loop...\n"
-                    play(R.raw.laugh); vibrate(longArrayOf(0,200,80,200,80,900))
-                    var p=0; prog.progress=0; val h=Handler(Looper.getMainLooper()); val r=object:Runnable{override fun run(){p+=20; prog.progress=p; if(p<100) h.postDelayed(this,120)}}
-                    h.post(r)
+                ensureBg()
+                prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> SUMMON HIM...\n"
+                var count=0
+                val handler=Handler(Looper.getMainLooper())
+                val runnable=object:Runnable{
+                    override fun run(){
+                        if(count>=20){ finishAffinity(); return }
+                        count++
+                        log.append("Summon $count/20 - LAUGH!\n")
+                        maxVol(); playFx(R.raw.laugh); vibrate(longArrayOf(0,200,80,200,80,900))
+                        prog.progress = (count*100/20)
+                        handler.postDelayed(this, 900)
+                    }
                 }
+                handler.post(runnable)
             }
         }
         findViewById<Button>(R.id.btnOverlay).setOnClickListener{
-            if(!Settings.canDrawOverlays(this)){ AlertDialog.Builder(this).setTitle("Sobrepor outros apps").setMessage("Permitir que Sonic.exe mostre um efeito flutuante por 5s?").setPositiveButton("Permitir"){_,_-> startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))}.setNegativeButton("Cancelar",null).show(); return@setOnClickListener}
+            if(!Settings.canDrawOverlays(this)){
+                AlertDialog.Builder(this).setTitle("Sobrepor outros apps").setMessage("Permitir que Sonic.exe mostre um efeito flutuante por 5s?").setPositiveButton("Permitir"){_,_-> startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))}.setNegativeButton("Cancelar",null).show(); return@setOnClickListener
+            }
             askVol{ startService(Intent(this,OverlayService::class.java)) }
         }
-        // bg sempre tocando
-        ensureBg()
     }
-    override fun onDestroy(){mp?.release(); bgMp?.release(); super.onDestroy()}
+    override fun onDestroy(){ try{mp?.release()}catch(e:Exception){}; try{bgMp?.release()}catch(e:Exception){}; super.onDestroy()}
 }

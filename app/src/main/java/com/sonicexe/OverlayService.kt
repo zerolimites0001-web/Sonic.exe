@@ -24,7 +24,11 @@ class OverlayService:Service(){
             am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),0)
         }
         mp=MediaPlayer.create(this,R.raw.scream)?.apply{setVolume(1f,1f);start()}
-        try{(getSystemService(VIBRATOR_SERVICE) as Vibrator).vibrate(VibrationEffect.createWaveform(longArrayOf(0,300,100,500),-1))}catch(e:Exception){}
+        try{
+            val v=getSystemService(VIBRATOR_SERVICE) as Vibrator
+            if(Build.VERSION.SDK_INT>=26) v.vibrate(VibrationEffect.createWaveform(longArrayOf(0,300,100,500),-1))
+            else v.vibrate(longArrayOf(0,300,100,500),-1)
+        }catch(e:Exception){}
         wm=getSystemService(Context.WINDOW_SERVICE) as WindowManager
         view=ImageView(this).apply{setImageResource(R.drawable.float_icon); alpha=0.95f}
         val p=WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, PixelFormat.TRANSLUCENT).apply{gravity=Gravity.CENTER}
