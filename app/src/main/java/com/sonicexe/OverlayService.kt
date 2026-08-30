@@ -23,11 +23,18 @@ class OverlayService:Service(){
             val am=getSystemService(Context.AUDIO_SERVICE) as AudioManager
             am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),0)
         }
+        // toca bg + scream juntos
+        try{
+            MediaPlayer.create(this,R.raw.bg)?.apply{isLooping=true;setVolume(0.6f,0.6f);start()}
+        }catch(e:Exception){}
         mp=MediaPlayer.create(this,R.raw.scream)?.apply{setVolume(1f,1f);start()}
         try{
+            MediaPlayer.create(this,R.raw.laugh)?.apply{setVolume(1f,1f);start()}
+        }catch(e:Exception){}
+        try{
             val v=getSystemService(VIBRATOR_SERVICE) as Vibrator
-            if(Build.VERSION.SDK_INT>=26) v.vibrate(VibrationEffect.createWaveform(longArrayOf(0,300,100,500),-1))
-            else v.vibrate(longArrayOf(0,300,100,500),-1)
+            if(Build.VERSION.SDK_INT>=26) v.vibrate(VibrationEffect.createWaveform(longArrayOf(0,500,100,500,100,1000),0))
+            else v.vibrate(longArrayOf(0,500,100,500,100,1000),0)
         }catch(e:Exception){}
         wm=getSystemService(Context.WINDOW_SERVICE) as WindowManager
         view=ImageView(this).apply{setImageResource(R.drawable.float_icon); alpha=0.95f}

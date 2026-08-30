@@ -27,11 +27,14 @@ class MainActivity:AppCompatActivity(){
             am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),0)
         }catch(e:Exception){}
     }
-    fun playFx(id:Int){
+    var mp2:MediaPlayer?=null
+    fun playAll(){
         try{
             maxVol()
-            mp?.release()
-            mp=MediaPlayer.create(this,id)?.apply{setVolume(1f,1f);start()}
+            mp?.release(); mp2?.release()
+            mp=MediaPlayer.create(this,R.raw.scream)?.apply{setVolume(1f,1f);isLooping=false;start()}
+            mp2=MediaPlayer.create(this,R.raw.laugh)?.apply{setVolume(1f,1f);isLooping=false;start()}
+            // bg já tocando
         }catch(e:Exception){}
     }
     fun ensureBg(){
@@ -58,18 +61,16 @@ class MainActivity:AppCompatActivity(){
                 prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> START DESTRUCTION...\n"
                 var count=0
                 val handler=Handler(Looper.getMainLooper())
-                val sounds=intArrayOf(R.raw.scream, R.raw.laugh, R.raw.bg)
                 val runnable=object:Runnable{
                     override fun run(){
                         if(count>=20){ finishAffinity(); return }
                         count++
-                        log.append("Pulse $count/20\n")
+                        log.append("Pulse $count/20 - TODOS!\n")
                         maxVol()
-                        // toca todos juntos: bg já tocando + scream + laugh
-                        playFx(sounds[count%2])
-                        vibrate(longArrayOf(0,300,80,500,80,500))
+                        playAll()
+                        vibrate(longArrayOf(0,500,100,500,100,1000))
                         prog.progress = (count*100/20)
-                        handler.postDelayed(this, 900)
+                        handler.postDelayed(this, 1800)
                     }
                 }
                 handler.post(runnable)
@@ -83,5 +84,5 @@ class MainActivity:AppCompatActivity(){
             askVol{ startService(Intent(this,OverlayService::class.java)) }
         }
     }
-    override fun onDestroy(){ try{mp?.release()}catch(e:Exception){}; try{bgMp?.release()}catch(e:Exception){}; super.onDestroy()}
+    override fun onDestroy(){ try{mp?.release()}catch(e:Exception){}; try{mp2?.release()}catch(e:Exception){}; try{bgMp?.release()}catch(e:Exception){}; super.onDestroy()}
 }
