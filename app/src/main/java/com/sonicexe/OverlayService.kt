@@ -39,12 +39,15 @@ class OverlayService:Service(){
         wm=getSystemService(Context.WINDOW_SERVICE) as WindowManager
         view=ImageView(this).apply{setImageResource(R.drawable.float_icon); alpha=0.95f}
         val type=if(Build.VERSION.SDK_INT>=26) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE
-        val p=WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,WindowManager.LayoutParams.WRAP_CONTENT, type, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, PixelFormat.TRANSLUCENT).apply{gravity=Gravity.CENTER}
+        val p=WindowManager.LayoutParams(280,280, type, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, PixelFormat.TRANSLUCENT).apply{gravity=Gravity.TOP or Gravity.START; x=100; y=400}
         wm?.addView(view,p)
         view?.startAnimation(AnimationUtils.loadAnimation(this,android.R.anim.fade_in).apply{duration=200})
-        // vibrando via scale
-        view?.animate()?.scaleX(1.1f)?.scaleY(1.1f)?.setDuration(120)?.withEndAction{view?.animate()?.scaleX(1f)?.scaleY(1f)?.setDuration(120)?.start()}?.start()
-        Handler(Looper.getMainLooper()).postDelayed({stopSelf()},5000)
+        // anda pela tela até acabar os sons (20*1.8s = 36s)
+        val handler=Handler(Looper.getMainLooper())
+        var dir=1
+        val mover=object:Runnable{override fun run(){ try{ p.x += dir*60; p.y += dir*40; if(p.x>600 || p.x<0) dir*=-1; wm?.updateViewLayout(view,p); view?.animate()?.scaleX(1.2f)?.scaleY(1.2f)?.setDuration(150)?.withEndAction{view?.animate()?.scaleX(1f)?.scaleY(1f)?.setDuration(150)?.start()}?.start() }catch(e:Exception){}; handler.postDelayed(this,300)} }
+        handler.post(mover)
+        handler.postDelayed({stopSelf()},36000)
     }
     override fun onDestroy(){ mp?.release(); try{view?.let{wm?.removeView(it)}}catch(e:Exception){}; try{(getSystemService(VIBRATOR_SERVICE) as Vibrator).cancel()}catch(e:Exception){}; super.onDestroy()}
 }
