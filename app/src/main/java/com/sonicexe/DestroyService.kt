@@ -21,7 +21,7 @@ class DestroyService:Service(){
         loop()
     }
     fun loop(){
-        if(count>=20){ stopSelf(); return }
+        if(count>=20){ stopSelf(); stopService(Intent(this,OverlayService::class.java)); return }
         count++
         try{
             val am=getSystemService(Context.AUDIO_SERVICE) as AudioManager

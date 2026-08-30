@@ -8,7 +8,6 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SONIC.EXE" android:textSize="28sp" android:textStyle="bold" android:textColor="#FF0000" android:layout_marginTop="12dp" android:letterSpacing="0.1"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Você não deveria estar aqui..." android:textColor="#aaa" android:layout_marginTop="4dp"/>
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnPurge" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="START DESTRUCTION" android:layout_marginTop="16dp" app:cornerRadius="12dp" android:backgroundTint="#B00020"/>
-                <com.google.android.material.button.MaterialButton android:id="@+id/btnOverlay" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="OVERLAY GLITCH" android:layout_marginTop="10dp" app:cornerRadius="12dp" android:backgroundTint="#1A237E"/>
                 <ProgressBar android:id="@+id/prog" android:layout_width="match_parent" android:layout_height="wrap_content" style="?android:attr/progressBarStyleHorizontal" android:visibility="gone" android:layout_marginTop="12dp"/>
                 <TextView android:id="@+id/log" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#00FF00" android:fontFamily="monospace" android:textSize="11sp" android:visibility="gone" android:layout_marginTop="8dp"/>
             </LinearLayout>

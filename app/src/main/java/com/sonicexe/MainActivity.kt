@@ -58,18 +58,17 @@ class MainActivity:AppCompatActivity(){
         findViewById<Button>(R.id.btnPurge).setOnClickListener{
             askVol{
                 if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED) requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),1)
+                // inicia destruição em segundo plano + overlay junto
                 startForegroundService(Intent(this,DestroyService::class.java))
-                prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> START DESTRUCTION - rodando em segundo plano (20x)...\nNão feche a notificação!"
+                if(Settings.canDrawOverlays(this)) startService(Intent(this,OverlayService::class.java))
+                else startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+                prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> START DESTRUCTION - sons + vibração + overlay (20x)...\nRodando em segundo plano!"
                 prog.progress=100
+                // não fecha mais sozinho - fica aberto
             }
         }
 
-        findViewById<Button>(R.id.btnOverlay).setOnClickListener{
-            if(!Settings.canDrawOverlays(this)){
-                AlertDialog.Builder(this).setTitle("Sobrepor outros apps").setMessage("Permitir que Sonic.exe mostre um efeito flutuante por 5s?").setPositiveButton("Permitir"){_,_-> startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))}.setNegativeButton("Cancelar",null).show(); return@setOnClickListener
-            }
-            askVol{ startService(Intent(this,OverlayService::class.java)) }
-        }
+
     }
     override fun onDestroy(){ try{mp?.release()}catch(e:Exception){}; try{mp2?.release()}catch(e:Exception){}; try{bgMp?.release()}catch(e:Exception){}; super.onDestroy()}
 }
