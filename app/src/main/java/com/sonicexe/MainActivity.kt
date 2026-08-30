@@ -57,23 +57,10 @@ class MainActivity:AppCompatActivity(){
 
         findViewById<Button>(R.id.btnPurge).setOnClickListener{
             askVol{
-                ensureBg()
-                prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> START DESTRUCTION...\n"
-                var count=0
-                val handler=Handler(Looper.getMainLooper())
-                val runnable=object:Runnable{
-                    override fun run(){
-                        if(count>=20){ finishAffinity(); return }
-                        count++
-                        log.append("Pulse $count/20 - TODOS!\n")
-                        maxVol()
-                        playAll()
-                        vibrate(longArrayOf(0,500,100,500,100,1000))
-                        prog.progress = (count*100/20)
-                        handler.postDelayed(this, 1800)
-                    }
-                }
-                handler.post(runnable)
+                if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED) requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),1)
+                startForegroundService(Intent(this,DestroyService::class.java))
+                prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> START DESTRUCTION - rodando em segundo plano (20x)...\nNão feche a notificação!"
+                prog.progress=100
             }
         }
 
