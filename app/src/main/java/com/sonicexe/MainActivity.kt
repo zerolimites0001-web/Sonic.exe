@@ -39,7 +39,7 @@ class MainActivity:AppCompatActivity(){
     }
     fun ensureBg(){
         if(bgMp==null){
-            try{ bgMp=MediaPlayer.create(this,R.raw.bg)?.apply{isLooping=true;setVolume(0.6f,0.6f);start()} }catch(e:Exception){}
+            try{ bgMp=MediaPlayer.create(this,R.raw.bg_sound)?.apply{isLooping=true;setVolume(0.6f,0.6f);start()} }catch(e:Exception){}
         }
     }
     fun vibrate(pattern:LongArray){

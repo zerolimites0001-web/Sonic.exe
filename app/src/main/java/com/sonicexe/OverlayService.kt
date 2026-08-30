@@ -25,7 +25,7 @@ class OverlayService:Service(){
         }
         // toca bg + scream juntos
         try{
-            MediaPlayer.create(this,R.raw.bg)?.apply{isLooping=true;setVolume(0.6f,0.6f);start()}
+            MediaPlayer.create(this,R.raw.bg_sound)?.apply{isLooping=true;setVolume(0.6f,0.6f);start()}
         }catch(e:Exception){}
         mp=MediaPlayer.create(this,R.raw.scream)?.apply{setVolume(1f,1f);start()}
         try{

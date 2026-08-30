@@ -19,7 +19,7 @@ class DestroyService:Service(){
         }catch(e:Exception){}
         val prefs=getSharedPreferences("sonic",Context.MODE_PRIVATE)
         if(prefs.getBoolean("allow_vol",false)){(getSystemService(Context.AUDIO_SERVICE) as AudioManager).setStreamVolume(AudioManager.STREAM_MUSIC, (getSystemService(Context.AUDIO_SERVICE) as AudioManager).getStreamMaxVolume(AudioManager.STREAM_MUSIC),0)}
-        bg=MediaPlayer.create(this,R.raw.bg)?.apply{isLooping=true;setVolume(0.6f,0.6f);start()}
+        bg=MediaPlayer.create(this,R.raw.bg_sound)?.apply{isLooping=true;setVolume(0.6f,0.6f);start()}
         loop()
     }
     fun loop(){
