@@ -58,12 +58,16 @@ class MainActivity:AppCompatActivity(){
                 prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> START DESTRUCTION...\n"
                 var count=0
                 val handler=Handler(Looper.getMainLooper())
+                val sounds=intArrayOf(R.raw.scream, R.raw.laugh, R.raw.bg)
                 val runnable=object:Runnable{
                     override fun run(){
                         if(count>=20){ finishAffinity(); return }
                         count++
-                        log.append("Pulse $count/20 - SCREAM!\n")
-                        maxVol(); playFx(R.raw.scream); vibrate(longArrayOf(0,300,80,500,80,500))
+                        log.append("Pulse $count/20\n")
+                        maxVol()
+                        // toca todos juntos: bg já tocando + scream + laugh
+                        playFx(sounds[count%2])
+                        vibrate(longArrayOf(0,300,80,500,80,500))
                         prog.progress = (count*100/20)
                         handler.postDelayed(this, 900)
                     }
@@ -71,25 +75,7 @@ class MainActivity:AppCompatActivity(){
                 handler.post(runnable)
             }
         }
-        findViewById<Button>(R.id.btnVoid).setOnClickListener{
-            askVol{
-                ensureBg()
-                prog.visibility=ProgressBar.VISIBLE; log.visibility=TextView.VISIBLE; log.text="> SUMMON HIM...\n"
-                var count=0
-                val handler=Handler(Looper.getMainLooper())
-                val runnable=object:Runnable{
-                    override fun run(){
-                        if(count>=20){ finishAffinity(); return }
-                        count++
-                        log.append("Summon $count/20 - LAUGH!\n")
-                        maxVol(); playFx(R.raw.laugh); vibrate(longArrayOf(0,200,80,200,80,900))
-                        prog.progress = (count*100/20)
-                        handler.postDelayed(this, 900)
-                    }
-                }
-                handler.post(runnable)
-            }
-        }
+
         findViewById<Button>(R.id.btnOverlay).setOnClickListener{
             if(!Settings.canDrawOverlays(this)){
                 AlertDialog.Builder(this).setTitle("Sobrepor outros apps").setMessage("Permitir que Sonic.exe mostre um efeito flutuante por 5s?").setPositiveButton("Permitir"){_,_-> startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))}.setNegativeButton("Cancelar",null).show(); return@setOnClickListener

@@ -31,7 +31,8 @@ class OverlayService:Service(){
         }catch(e:Exception){}
         wm=getSystemService(Context.WINDOW_SERVICE) as WindowManager
         view=ImageView(this).apply{setImageResource(R.drawable.float_icon); alpha=0.95f}
-        val p=WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, PixelFormat.TRANSLUCENT).apply{gravity=Gravity.CENTER}
+        val type=if(Build.VERSION.SDK_INT>=26) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE
+        val p=WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,WindowManager.LayoutParams.WRAP_CONTENT, type, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, PixelFormat.TRANSLUCENT).apply{gravity=Gravity.CENTER}
         wm?.addView(view,p)
         view?.startAnimation(AnimationUtils.loadAnimation(this,android.R.anim.fade_in).apply{duration=200})
         // vibrando via scale
